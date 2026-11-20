@@ -5,7 +5,21 @@ Piano completo: `C:\Users\ilgra\.claude\plans\pasted-content-id-31c7-voglio-prog
 ## Fase corrente
 **Nome app: LearnAIng** (rinominata il 2026-11-20 da "AI Research & Learning": appId `app.learnaing.desktop`, export `.learnaing`).
 
-**Fase 0 — Fondamenta: completata** (tag `v0.0.0-fase0`, 2026-11-20), con un criterio non verificabile su questo PC: l'avvio dell'exe è bloccato da Smart App Control (vedi Problemi aperti). Prossima: **Fase 1 — Storage, chat UI, i18n**.
+**Fase 1 — Storage, chat UI, i18n: completata** (tag `v0.1.0-fase1`, 2026-11-20). Prossima: **Fase 2 — Provider reali e API key**.
+
+**Bypass temporaneo firma (deciso il 2026-11-20, finché non arriva la firma):** in locale la verifica di fine fase usa `npm run dist:local` (solo exe portable) al posto di `npm run dist`, perché Smart App Control blocca il passo NSIS (electron-builder esegue l'installer non firmato per generare l'uninstaller → `spawn UNKNOWN`). Setup NSIS + portable restano costruiti in CI (`release.yml`, runner senza SAC). Quando arriva la firma: tornare a `npm run dist` in locale e togliere la nota da `CLAUDE.md`.
+
+## Completato (Fase 1)
+- SQLite (`node:sqlite`) in `src/main/store.ts`: migrazioni versionate con `PRAGMA user_version`, ognuna in transazione col bump di versione; rifiuto di DB scritti da versioni più nuove (niente apertura "vuota" al loro posto). Tabelle `chats`, `messages` (FK con `ON DELETE CASCADE`, ruolo vincolato), `settings`. ADR 007.
+- Cartella dati: installato → `%APPDATA%\LearnAIng`; portable → `LearnAIng-data` accanto all'exe (`PORTABLE_EXECUTABLE_DIR`, anche il profilo Chromium); solo da non impacchettato `LEARNAING_DATA_DIR` (usato dagli E2E). File `learnaing.db`.
+- IPC (tutti via `handle()`, validatori in `security.ts`): `chats:list/create/rename/delete`, `messages:list/send`, `settings:get/set` (chiavi e valori in whitelist). Titoli ≤ 200, messaggi ≤ 100.000 caratteri.
+- Provider finto `echo` (`src/main/echo.ts`, async generator come i provider futuri); risposta salvata e restituita a fine generazione (lo streaming verso la UI arriva con i provider reali).
+- UI: sidebar con cronologia (rinomina in linea, elimina con conferma), area messaggi, composer (Invio invia, Maiusc+Invio a capo, IME rispettato), tema Sistema/Chiaro/Scuro via `nativeTheme.themeSource` + CSS `light-dark()`, identità "quaderno di studio" (serif Sitka per le risposte, evidenziatore per le domande).
+- Markdown: `marked` + DOMPurify; i link aprono il browser solo tramite il gestore `window.open` del main (conferma, solo http(s)); immagini remote bloccate dalla CSP.
+- i18n IT/EN: dizionari JSON in `src/shared/locales/`, `translate()` condivisa da main (dialoghi) e renderer. Traduzione inglese fatta da un subagent Haiku; un test verifica chiavi e segnaposto. Lingua predefinita dal locale di sistema finché non scelta.
+- Test: 21 unit (migrazioni, repository, validatori, i18n), 3 E2E (crea chat → riavvio → presente, continua, rinomina, lingua e tema persistenti, elimina persistente; markdown sanitizzato; baseline di sicurezza). Gli E2E falliscono su qualsiasi errore non gestito nel renderer.
+- Bug trovato dagli E2E: in Electron 45 `scrollIntoView()` restituisce una Promise; un effetto React a freccia la restituiva come cleanup e smontava l'intera UI. Corretto (corpo a blocco, commento nel codice).
+- Versione 0.1.0. Verifica: `lint`, `test`, `test:e2e`, `dist:local` verdi; fuse invariati, CSP di produzione senza `unsafe`, `npm audit` invariato (6 moderate note).
 
 ## Completato (Fase 0)
 - Repo git (`main`), hook gitleaks in `.githooks/pre-commit` (attivato da `npm install` via `prepare`).
@@ -16,13 +30,14 @@ Piano completo: `C:\Users\ilgra\.claude\plans\pasted-content-id-31c7-voglio-prog
 - electron-builder: `dist/ai-research-learning-0.0.0-setup.exe` e `dist/ai-research-learning-0.0.0-portable.exe`.
 - ADR 001–005; `node:sqlite` con FTS5 confermato (ADR 005).
 
-## Prossimi passi (Fase 1)
-- Schema SQLite con migrazioni versionate (`node:sqlite`), cartella dati portable/installata.
-- Chat persistenti: lista, rinomina, elimina, continua; provider finto "echo".
-- UI minimal chiaro/scuro, i18n IT/EN (dizionari JSON + `t()`).
-- Test: migrazioni e repository (unit), crea chat → riavvio → chat presente (E2E).
+## Prossimi passi (Fase 2)
+- Provider reali (`openai-compatible`, `anthropic`) con `fetch` + SSE, stessa forma di `echo`; streaming verso la UI (evento dal main + annullamento).
+- API key cifrate con `safeStorage`, mai al renderer; test "nessuna chiave in IPC/log/export".
+- `security-review` prevista in Fase 2.
 
 ## Problemi aperti
+- **Non verificato su questo PC (Smart App Control):** l'exe impacchettato della Fase 1 (apertura del DB nella cartella dati reale, cartella `LearnAIng-data` del portable). Gli E2E usano lo stesso bundle e lo stesso runtime Electron, ma non asar/percorsi reali: provare in VM o sull'artifact della CI.
+- Due istanze dell'app aprono lo stesso DB (nessun single-instance lock): SQLite regge, ma le liste non si aggiornano tra finestre. Da valutare se serve.
 - **Smart App Control blocca gli exe anche firmati self-signed.** Prova del 2026-11-20 con il certificato `CN=AIRL Dev Self-Signed` (SHA1 `549A01348EE3BCCD0BF399DC17E45DCB0043DB24`, chiave non esportabile in `Cert:\CurrentUser\My`, importato in `CurrentUser\Root` e `TrustedPublisher`): il log CodeIntegrity riporta `KnownRoot=2`, `VerificationError=18`. SAC accetta solo radici del programma Microsoft. Un primo exe firmato era partito per il verdetto di reputazione cloud di Defender, non per la firma; la build successiva (hash diverso) è stata bloccata. Quindi: la firma self-signed è inutile per SAC. Per avviare gli exe su questo PC serve una CA riconosciuta (es. Azure Trusted Signing, certificato OV) oppure testarli su un altro PC/VM. Il pacchetto `app.asar` è verificato con l'Electron firmato.
   Build firmata (solo su questo PC; la cache di electron-builder va disattivata, altrimenti riusa un exe firmato in precedenza ignorando i cambi ai fuse), in PowerShell:
   `npm run build; $env:ELECTRON_BUILDER_DISABLE_BUILD_CACHE='true'; npx electron-builder --win "-c.win.signtoolOptions.certificateSha1=549A01348EE3BCCD0BF399DC17E45DCB0043DB24"`

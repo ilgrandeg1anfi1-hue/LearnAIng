@@ -28,5 +28,6 @@
 
 ## Note
 - In dev la CSP consente `unsafe-inline` per script e stili (preamble React Refresh e CSS di Vite): plugin `dev-csp` in `electron.vite.config.ts`, applicato solo al dev server.
+- Fase 1: `LEARNAING_DATA_DIR` (cartella dati alternativa per gli E2E) è letta solo se l'app non è impacchettata, come `ELECTRON_RENDERER_URL`. Le impostazioni via IPC accettano solo chiavi e valori in whitelist (`isSetting`), robusta anche a `__proto__`/`constructor`. Il Markdown passa da DOMPurify; i link ricevono `target="_blank"` e quindi escono solo tramite `setWindowOpenHandler` (conferma, solo http(s)). Gli E2E verificano che `<script>` e `onerror` iniettati non arrivino al DOM.
 - L'`eval` non è verificabile in E2E: `page.evaluate` di Playwright passa da CDP e ignora la CSP. Si verifica invece il blocco di uno script inline iniettato.
 - Firma: un certificato self-signed non soddisfa Smart App Control (serve una radice del programma Microsoft). Prima della distribuzione serve un certificato di una CA riconosciuta. Se il certificato self-signed di prova resta tra le radici attendibili dell'utente, la sua chiave privata (non esportabile) non va mai copiata né committata.

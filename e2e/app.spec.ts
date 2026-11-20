@@ -1,12 +1,14 @@
 import { _electron as electron, expect, test } from '@playwright/test'
+import pkg from '../package.json'
 
 test('opens the window with an isolated, locked-down renderer', async () => {
-  const app = await electron.launch({ args: ['.'] })
+  const dataDir = test.info().outputPath('data')
+  const app = await electron.launch({ args: ['.'], env: { ...process.env, LEARNAING_DATA_DIR: dataDir } })
   const win = await app.firstWindow()
 
   await expect(win).toHaveTitle('LearnAIng')
   // Version arrives through preload -> validated IPC -> main.
-  await expect(win.getByText('v0.0.0')).toBeVisible()
+  await expect(win.getByText(`v${pkg.version}`)).toBeVisible()
 
   // No Node in the renderer.
   const globals = await win.evaluate(() => {

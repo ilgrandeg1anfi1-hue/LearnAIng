@@ -19,7 +19,7 @@
 └─────────────────────────────────────────────────────────────┘
 ```
 
-Stato attuale (Fase 0): esistono solo la finestra, il preload con `getVersion` e l'helper IPC validato. I moduli `core/*` arrivano dalle fasi successive.
+Stato attuale (Fase 1): finestra, preload, helper IPC validato; `src/main/store.ts` (SQLite, migrazioni, repository chat/messaggi/impostazioni), provider finto `src/main/echo.ts`; i18n condiviso in `src/shared/` (dizionari JSON + `translate()`); UI chat in `src/renderer/src/App.tsx`. Gli altri moduli `core/*` arrivano dalle fasi successive.
 
 ## Confini
 | Confine | Regola |

@@ -19,9 +19,11 @@ App desktop Windows per ricerca approfondita verificata e apprendimento interatt
 | `npm test` | unit test (Vitest) |
 | `npm run test:e2e` | build + E2E Playwright su Electron |
 | `npm run dist` | build + exe NSIS e portable in `dist/` |
+| `npm run dist:local` | build + solo exe portable (temporaneo: NSIS bloccato in locale da Smart App Control finché manca la firma) |
 | `npm run check:sqlite` | verifica `node:sqlite` + FTS5 nel Node di Electron |
 
 Verifica di fine fase: `npm run lint && npm test && npm run test:e2e && npm run dist`.
+Temporaneo, finché non arriva la firma digitale: in locale l'ultimo passo è `npm run dist:local`; NSIS + portable si costruiscono in CI (`release.yml`). Vedi `docs/PROGRESS.md`.
 
 ## Struttura
 - `src/main/` — main process (Node). `security.ts` contiene i controlli puri ai confini (testati).

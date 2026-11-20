@@ -1,7 +1,7 @@
 {
   "name": "learnaing",
   "productName": "LearnAIng",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "private": true,
   "description": "Ricerca approfondita verificata e apprendimento interattivo, dati locali.",
   "license": "MIT",
@@ -11,6 +11,7 @@
     "dev": "electron-vite dev",
     "build": "electron-vite build",
     "dist": "electron-vite build && electron-builder --win",
+    "dist:local": "electron-vite build && electron-builder --win portable",
     "lint": "tsc --noEmit && eslint .",
     "test": "vitest run src",
     "test:e2e": "electron-vite build && playwright test",
@@ -38,6 +39,8 @@
     "vitest": "5.1.1"
   },
   "dependencies": {
+    "dompurify": "3.4.18",
+    "marked": "18.2.1",
     "react": "19.3.1",
     "react-dom": "19.3.1"
   },

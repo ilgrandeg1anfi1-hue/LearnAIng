@@ -3,6 +3,21 @@
 Formato: [Keep a Changelog](https://keepachangelog.com/it/1.1.0/), versioni [SemVer](https://semver.org/lang/it/).
 
 ## [Non rilasciato]
+
+## [0.1.0-fase1] - 2026-11-20
+### Aggiunto
+- Storage SQLite (`node:sqlite`) con migrazioni versionate (`PRAGMA user_version`, transazionali, rifiuto di DB più nuovi); tabelle chat, messaggi, impostazioni (ADR 007).
+- Chat persistenti: crea (al primo messaggio), lista, rinomina, elimina, continua; provider finto "echo".
+- UI chat con sidebar, area messaggi e composer; tema Sistema/Chiaro/Scuro; identità grafica propria.
+- Markdown sanitizzato con `marked` + DOMPurify; i link passano dalla conferma del main.
+- i18n italiano/inglese con dizionari JSON e `translate()` condivisa da main e renderer.
+- Cartella dati portable accanto all'exe (`LearnAIng-data`).
+- Test: unit su migrazioni, repository, validatori IPC e dizionari; E2E chat → riavvio → chat presente, impostazioni persistenti, sanitizzazione.
+- `npm run dist:local`: build locale solo portable, finché Smart App Control blocca il passo NSIS non firmato.
+
+### Corretto
+- Crash del renderer: in Electron 45 `scrollIntoView()` restituisce una Promise che React prendeva per funzione di cleanup.
+
 ### Modificato
 - App rinominata **LearnAIng** (appId `app.learnaing.desktop`, estensione export `.learnaing`); licenza MIT, repository pubblico.
 - README, privacy policy, code signing policy; workflow di release in GitHub Actions (pre-release con checksum).
