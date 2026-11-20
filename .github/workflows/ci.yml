@@ -4,17 +4,30 @@ on:
   pull_request:
 permissions:
   contents: read
+# Third-party actions are pinned to a commit SHA (tag in the comment) against tag hijacking.
 jobs:
   check:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 24
           cache: npm
       - run: npm ci
       - run: npm run lint
       - run: npm test
+      - run: npm run test:e2e
       # build tooling (electron-builder) carries moderate dev-only advisories; fail on high+
       - run: npm audit --audit-level=high
+
+  # GitHub secret scanning is not available on free private repos: gitleaks is the server-side check.
+  secrets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@e0c47f4f8be36e29cdc102c57e68cb5cbf0e8d1e # v3.0.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

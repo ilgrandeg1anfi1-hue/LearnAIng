@@ -2,6 +2,11 @@
 
 Formato: [Keep a Changelog](https://keepachangelog.com/it/1.1.0/), versioni [SemVer](https://semver.org/lang/it/).
 
+## [Non rilasciato]
+### Sicurezza
+- Electron fuses sull'exe impacchettato (niente RunAsNode, NODE_OPTIONS, `--inspect`; integrità asar).
+- CI: E2E, scansione segreti con gitleaks, action fissate per SHA.
+
 ## [0.0.0-fase0] - 2026-11-20
 ### Aggiunto
 - Scaffold Electron 45 + electron-vite + React 19 + TypeScript.

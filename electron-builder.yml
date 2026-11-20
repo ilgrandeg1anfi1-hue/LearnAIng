@@ -5,6 +5,14 @@ directories:
 files:
   - out/**
   - package.json
+# The signed exe must not be usable as a generic Node runtime or debug target.
+electronFuses:
+  runAsNode: false
+  enableNodeOptionsEnvironmentVariable: false
+  enableNodeCliInspectArguments: false
+  enableEmbeddedAsarIntegrityValidation: true
+  onlyLoadAppFromAsar: true
+  enableCookieEncryption: true
 win:
   target:
     - nsis
