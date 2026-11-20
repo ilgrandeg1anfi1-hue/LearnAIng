@@ -40,13 +40,21 @@ Nessuna VM disponibile su questo PC (niente Windows Sandbox, Hyper-V, VirtualBox
 - **Non verificabile qui:** avvio dell'exe vero (launcher NSIS, estrazione in `%TEMP%`, impostazione di `PORTABLE_EXECUTABLE_DIR`, controllo d'integrità asar a runtime, fuse attivi a runtime) su Windows pulito. Da fare in VM: copiare l'exe in una cartella, avviarlo, controllare `LearnAIng-data\learnaing.db`, creare una chat, chiudere, riaprire, controllare la chat; DevTools da menu Visualizza per gli errori del renderer.
 - Nota: le dipendenze runtime (`react`, `marked`, `dompurify`, `@types/trusted-types`) finiscono anche in `node_modules` dell'asar pur essendo già nel bundle del renderer: solo spazio, nessun errore.
 
+## Verifica exe portable reale in CI (2026-11-20)
+Tag locale `v0.1.1-fase1` su `351db2e` (non pushato; `package.json` resta `0.1.0`). Branch `verify/portable-exe`, workflow `.github/workflows/portable.yml` (solo quel branch, nessun upload né release): build dell'exe portable sul runner e avvio dell'**exe vero** con `e2e/portable.spec.ts` (saltato senza `PORTABLE_EXE`).
+- Guida via CDP (`--remote-debugging-port`), perché i fuse disattivano `--inspect` richiesto da `_electron.launch`. Exe copiato in una cartella con spazio e accenti.
+- Controlli: launcher vivo finché l'app gira; tutti i processi `LearnAIng.exe` sotto `%TEMP%` con `resources\app.asar`; titolo e `v0.1.0` (preload + IPC); chat creata; `LearnAIng-data\learnaing.db` presente; chiusura finestra → exit code 0; cartella di estrazione rimossa; accanto all'exe solo exe + `LearnAIng-data`; niente `%APPDATA%\LearnAIng`; DB letto con `node:sqlite` (1 chat, 2 messaggi); riavvio → chat presente e apribile; zero `pageerror`/console error/crash renderer; log Chromium (`--enable-logging=file`, copre anche il caricamento) senza righe CONSOLE/FATAL; nessun evento WER 1000/1001.
+- **Esito run 44756181009: superato** (28 s), Windows Server 2025 (`windows-2025-vs2026`). SHA256 exe: `cc2c5d43690a07d5ab27c5e4435cf2aaf54ab475079477728901ba499c3364f9`. Log Chromium: solo `GetGpuDriverOverlayInfo: Failed to retrieve video device` (runner senza GPU). CI (`check`, `secrets`) verde sullo stesso push.
+- Limiti: Windows Server, non Windows 11 client; utente amministratore; exe costruito sul runner, quindi niente Mark of the Web, SmartScreen né Smart App Control; Electron in rendering software.
+
 ## Prossimi passi (Fase 2)
 - Provider reali (`openai-compatible`, `anthropic`) con `fetch` + SSE, stessa forma di `echo`; streaming verso la UI (evento dal main + annullamento).
 - API key cifrate con `safeStorage`, mai al renderer; test "nessuna chiave in IPC/log/export".
 - `security-review` prevista in Fase 2.
 
 ## Problemi aperti
-- **Avvio dell'exe vero non verificato su Windows pulito** (qui lo blocca Smart App Control): asar, integrità, fuse, cartella dati e persistenza verificati smontando l'exe (vedi "Verifica exe portable Fase 1"); resta da provarlo in VM o sull'artifact della CI.
+- Avvio dell'exe portable vero: **verificato in CI** su Windows Server 2025 (vedi "Verifica exe portable reale in CI"). Restano non verificati Windows 11 client, SmartScreen/Smart App Control e il setup NSIS.
+- Branch `verify/portable-exe` non ancora unito a `main` (anche `ca3c743` e `351db2e` sono su GitHub solo tramite quel branch).
 - Due istanze dell'app aprono lo stesso DB (nessun single-instance lock): SQLite regge, ma le liste non si aggiornano tra finestre. Da valutare se serve.
 - **Smart App Control blocca gli exe anche firmati self-signed.** Prova del 2026-11-20 con il certificato `CN=AIRL Dev Self-Signed` (SHA1 `549A01348EE3BCCD0BF399DC17E45DCB0043DB24`, chiave non esportabile in `Cert:\CurrentUser\My`, importato in `CurrentUser\Root` e `TrustedPublisher`): il log CodeIntegrity riporta `KnownRoot=2`, `VerificationError=18`. SAC accetta solo radici del programma Microsoft. Un primo exe firmato era partito per il verdetto di reputazione cloud di Defender, non per la firma; la build successiva (hash diverso) è stata bloccata. Quindi: la firma self-signed è inutile per SAC. Per avviare gli exe su questo PC serve una CA riconosciuta (es. Azure Trusted Signing, certificato OV) oppure testarli su un altro PC/VM. Il pacchetto `app.asar` è verificato con l'Electron firmato.
   Build firmata (solo su questo PC; la cache di electron-builder va disattivata, altrimenti riusa un exe firmato in precedenza ignorando i cambi ai fuse), in PowerShell:
