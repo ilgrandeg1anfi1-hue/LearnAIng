@@ -17,11 +17,13 @@ const NAME = 'ginafi.LearnAIng'
 const PUBLISHER = 'CN=BB687092-540B-4E7F-80F7-703E81CC06CA'
 const PORT = 9339
 
-// Encoded: the scripts below carry quotes and a here-string.
+// Encoded: the scripts below carry quotes and a here-string. No progress records: they end up in error messages.
 const powershell = (command: string) =>
-  execFileSync('powershell', ['-NoProfile', '-EncodedCommand', Buffer.from(command, 'utf16le').toString('base64')], {
-    encoding: 'utf8'
-  })
+  execFileSync(
+    'powershell',
+    ['-NoProfile', '-EncodedCommand', Buffer.from(`$ProgressPreference = 'SilentlyContinue'\n${command}`, 'utf16le').toString('base64')],
+    { encoding: 'utf8' }
+  )
 
 type AppxPackage = { Name: string; Publisher: string; Version: string; PackageFamilyName: string; PackageFullName: string; InstallLocation: string }
 const installed = (): AppxPackage | undefined => {
@@ -47,9 +49,16 @@ public interface IApplicationActivationManager {
 }
 [ComImport, Guid("45BA127D-10A8-46EA-8AB7-56EA9078943C")]
 public class ApplicationActivationManager {}
+public static class AppActivation {
+  // The C# cast does the COM QueryInterface; a PowerShell cast does not.
+  public static uint Start(string id, string args) {
+    uint pid;
+    ((IApplicationActivationManager)new ApplicationActivationManager()).ActivateApplication(id, args, 0, out pid);
+    return pid;
+  }
+}
 '@
-$appPid = [uint32]0
-([IApplicationActivationManager](New-Object ApplicationActivationManager)).ActivateApplication('${aumid}', '${args}', 0, [ref]$appPid)`)
+[AppActivation]::Start('${aumid}', '${args}')`)
 
 const errors: string[] = []
 
@@ -85,7 +94,7 @@ test('the Store package installs, runs with package identity, keeps its data acr
   expect(existsSync(appData), 'precondition: no unpackaged profile').toBe(false)
   expect(appProcesses(), 'precondition: app not running').toEqual([])
 
-  powershell(`$ProgressPreference = 'SilentlyContinue'; Add-AppxPackage -Path '${storePackage}'`)
+  powershell(`Add-AppxPackage -Path '${storePackage}'`)
   const appx = installed()!
   expect(appx).toMatchObject({ Name: NAME, Publisher: PUBLISHER, Version: `${pkg.version}.0` })
   const aumid = `${appx.PackageFamilyName}!LearnAIng`
@@ -136,7 +145,7 @@ test('the Store package installs, runs with package identity, keeps its data acr
   expect(crashes.trim()).toBe('')
 
   // Uninstall removes the app and its private storage, database included.
-  powershell(`$ProgressPreference = 'SilentlyContinue'; Remove-AppxPackage -Package '${appx.PackageFullName}'`)
+  powershell(`Remove-AppxPackage -Package '${appx.PackageFullName}'`)
   expect(installed()).toBeUndefined()
   expect(existsSync(packageData), 'package storage removed on uninstall').toBe(false)
 })
