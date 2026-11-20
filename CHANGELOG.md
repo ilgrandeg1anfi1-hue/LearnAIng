@@ -5,6 +5,7 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.1.0/), versioni [Sem
 ## [Non rilasciato]
 ### Modificato
 - App rinominata **LearnAIng** (appId `app.learnaing.desktop`, estensione export `.learnaing`); licenza MIT, repository pubblico.
+- README, privacy policy, code signing policy; workflow di release in GitHub Actions (pre-release con checksum).
 
 ### Sicurezza
 - Electron fuses sull'exe impacchettato (niente RunAsNode, NODE_OPTIONS, `--inspect`; integrità asar).

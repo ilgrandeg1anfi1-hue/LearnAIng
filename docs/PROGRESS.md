@@ -65,6 +65,10 @@ Piano completo: `C:\Users\ilgra\.claude\plans\pasted-content-id-31c7-voglio-prog
 3. **Senza firma:** l'avviso resta. Mitigazioni gratuite: per i propri PC copiare l'exe senza scaricarlo dal browser (niente Mark of the Web, niente SmartScreen; Smart App Control blocca comunque), oppure inviare l'exe a Microsoft (https://www.microsoft.com/wdsi/filesubmission) per la reputazione, da rifare a ogni versione.
 - Nota: la prima prova di `dist:store` (target concatenati) ha rigenerato anche setup e portable in `dist/` **non firmati**: gli hash della build testata in VM, riportati sopra, non corrispondono più ai file presenti.
 
+**SignPath, preparazione (2026-11-20):** aggiunti `README.md`, `PRIVACY.md`, `CODE_SIGNING_POLICY.md` (in inglese, per i revisori SignPath) e il workflow `.github/workflows/release.yml`: un tag `v*` esegue lint, test, E2E, build su runner pulito e pubblica una pre-release con `SHA256SUMS.txt`. Le release si costruiscono solo in CI.
+- **Build NSIS locale bloccata da Smart App Control** (2026-11-20): electron-builder esegue l'installer non firmato appena generato per estrarre l'uninstaller → `spawn UNKNOWN`, CodeIntegrity evento 3077 su `dist/learnaing-0.0.0-setup.exe`. Le build precedenti passavano per reputazione cloud degli hash. Locale funzionano ancora `npm run test:e2e` e `npm run dist:store`; setup/portable solo in CI (o con exe firmato).
+- Da fare: MFA su GitHub (dichiarata in `CODE_SIGNING_POLICY.md`), candidatura su signpath.org, poi step di firma SignPath nel workflow di release.
+
 **Passaggi quando si acquista (OV/IV):**
 1. Scegliere la CA, chiedere certificato **RSA** con firma in cloud o token; completare la validazione.
 2. Installare lo strumento del fornitore (es. SimplySign Desktop) ed effettuare il login: il certificato compare in `Cert:\CurrentUser\My`.
