@@ -27,4 +27,4 @@
 ## Note
 - In dev la CSP consente `unsafe-inline` per script e stili (preamble React Refresh e CSS di Vite): plugin `dev-csp` in `electron.vite.config.ts`, applicato solo al dev server.
 - L'`eval` non è verificabile in E2E: `page.evaluate` di Playwright passa da CDP e ignora la CSP. Si verifica invece il blocco di uno script inline iniettato.
-- Gli exe non sono firmati: Windows SmartScreen / Smart App Control li bloccano o avvisano. Accettato per la v1 (vedi `docs/PROGRESS.md`).
+- Gli exe sono firmati solo con un certificato self-signed attendibile sul PC di sviluppo (vedi `docs/PROGRESS.md`). Altrove SmartScreen / Smart App Control li bloccano o avvisano: prima della distribuzione serve un certificato di una CA riconosciuta. Il certificato self-signed è una radice attendibile per l'utente: la sua chiave privata resta non esportabile e non va mai copiata né committata.

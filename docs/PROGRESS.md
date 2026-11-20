@@ -21,7 +21,9 @@ Piano completo: `C:\Users\ilgra\.claude\plans\pasted-content-id-31c7-voglio-prog
 - Test: migrazioni e repository (unit), crea chat → riavvio → chat presente (E2E).
 
 ## Problemi aperti
-- **Exe non avviabile su questo PC**: Smart App Control (attivo) blocca gli exe non firmati ("Un criterio di controllo dell'applicazione ha bloccato il file"). Verificato invece che il pacchetto `dist/win-unpacked/resources/app.asar` si avvia con l'Electron firmato e risponde via IPC. Opzioni: firma del codice (certificato), test su un altro PC/VM, oppure accettare. Disattivare Smart App Control non è reversibile senza reinstallare Windows.
+- **Firma solo self-signed (risolto per questo PC, 2026-11-20)**: Smart App Control blocca gli exe non firmati. Creato il certificato `CN=AIRL Dev Self-Signed` (SHA1 `549A01348EE3BCCD0BF399DC17E45DCB0043DB24`, scade 2028-11-20, chiave non esportabile in `Cert:\CurrentUser\My`), reso attendibile in `CurrentUser\Root` e `CurrentUser\TrustedPublisher`. Con la firma l'exe portable si avvia e mostra la finestra. Build firmata (la config non è nel repo perché il certificato esiste solo su questo PC):
+  `npm run build && npx electron-builder --win -c.win.signtoolOptions.certificateSha1=549A01348EE3BCCD0BF399DC17E45DCB0043DB24`
+  Su altri PC l'exe resta non attendibile: per distribuirlo serve un certificato di una CA riconosciuta (decidere entro la Fase 8). Per revocare la fiducia: rimuovere il certificato da `certmgr.msc` → Autorità di certificazione radice attendibili e Autori attendibili.
 - `npm audit`: 6 vulnerabilità moderate in `electron-builder` (minimatch via `@electron/universal`, solo build). Nessuna alta; la CI fallisce solo da `high` in su.
 - Nessuna icona applicazione (usata quella di Electron).
 - GitHub secret scanning/push protection non ancora attivati sul repo (su repo privati possono richiedere GitHub Advanced Security).
