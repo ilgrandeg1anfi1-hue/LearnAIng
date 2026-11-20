@@ -1,0 +1,51 @@
+name: Store package
+# Builds the Microsoft Store package (MSIX) and installs it for real on a clean runner:
+# locally, sideloading would need a certificate trusted machine-wide. Publishes nothing.
+on:
+  push:
+    branches: ['verify/store-msix']
+permissions:
+  contents: read
+jobs:
+  msix:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run dist:store -- --publish never
+      - name: Checksum
+        shell: bash
+        run: sha256sum dist/learnaing-*-store.appx
+      # The Store signs the package at publication. To sideload it here, sign a copy with a throwaway
+      # certificate whose subject is the manifest Publisher, trusted on this runner only.
+      - name: Test-sign a copy
+        shell: pwsh
+        run: |
+          $appx = (Get-Item dist/learnaing-*-store.appx).FullName
+          Add-Type -AssemblyName System.IO.Compression.FileSystem
+          $zip = [IO.Compression.ZipFile]::OpenRead($appx)
+          $reader = [IO.StreamReader]::new($zip.GetEntry('AppxManifest.xml').Open())
+          $manifest = $reader.ReadToEnd()
+          $reader.Close(); $zip.Dispose()
+          $manifest
+          $publisher = ([xml]$manifest).Package.Identity.Publisher
+          $cert = New-SelfSignedCertificate -Type Custom -Subject $publisher -KeyUsage DigitalSignature -CertStoreLocation Cert:\CurrentUser\My -TextExtension @('2.5.29.37={text}1.3.6.1.5.5.7.3.3', '2.5.29.19={text}')
+          Export-Certificate -Cert $cert -FilePath "$env:RUNNER_TEMP\test.cer" | Out-Null
+          Import-Certificate -FilePath "$env:RUNNER_TEMP\test.cer" -CertStoreLocation Cert:\LocalMachine\TrustedPeople | Out-Null
+          $signtool = (Get-ChildItem 'C:\Program Files (x86)\Windows Kits\10\bin\*\x64\signtool.exe' | Sort-Object FullName | Select-Object -Last 1).FullName
+          $signed = "$env:RUNNER_TEMP\learnaing-test-signed.appx"
+          Copy-Item $appx $signed
+          & $signtool sign /fd SHA256 /sha1 $cert.Thumbprint $signed
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          "STORE_PACKAGE=$signed" >> $env:GITHUB_ENV
+      - name: Install, run and uninstall the package
+        shell: bash
+        run: npx playwright test store --reporter=list
+      - name: Chromium logs of the app runs
+        if: always()
+        shell: bash
+        run: tail -n +1 test-results/*/chromium-*.log || true
