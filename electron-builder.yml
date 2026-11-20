@@ -1,5 +1,5 @@
-appId: app.airl.desktop
-productName: AI Research & Learning
+appId: app.learnaing.desktop
+productName: LearnAIng
 directories:
   output: dist
 files:

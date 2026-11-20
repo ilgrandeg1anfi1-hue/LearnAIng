@@ -15,7 +15,7 @@
 | Exe usato come runtime Node | malware che sfrutta un binario firmato | Electron fuses: RunAsNode / NODE_OPTIONS / `--inspect` disabilitati, integrità asar |
 
 ## Checklist (rieseguire a ogni fase)
-- [ ] Fuses attivi sull'exe impacchettato (`npx @electron/fuses read --app "dist/win-unpacked/AI Research & Learning.exe"`): RunAsNode, NodeOptions, NodeCliInspect disabilitati; AsarIntegrity e OnlyLoadAppFromAsar abilitati.
+- [ ] Fuses attivi sull'exe impacchettato (`npx @electron/fuses read --app "dist/win-unpacked/LearnAIng.exe"`): RunAsNode, NodeOptions, NodeCliInspect disabilitati; AsarIntegrity e OnlyLoadAppFromAsar abilitati.
 - [ ] `webPreferences` invariati: `contextIsolation`, `sandbox`, `!nodeIntegration`, `webSecurity`.
 - [ ] CSP di produzione senza `unsafe-inline`/`unsafe-eval`/origini remote (`grep unsafe out/renderer/index.html` → vuoto).
 - [ ] Ogni nuovo canale IPC passa da `handle()` con validatore; il preload non espone `ipcRenderer`.

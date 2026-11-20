@@ -4,7 +4,7 @@ test('opens the window with an isolated, locked-down renderer', async () => {
   const app = await electron.launch({ args: ['.'] })
   const win = await app.firstWindow()
 
-  await expect(win).toHaveTitle('AI Research & Learning')
+  await expect(win).toHaveTitle('LearnAIng')
   // Version arrives through preload -> validated IPC -> main.
   await expect(win.getByText('v0.0.0')).toBeVisible()
 

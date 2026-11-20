@@ -1,4 +1,4 @@
-# ADR 004 — Formato export `.airl`
+# ADR 004 — Formato export `.learnaing`
 
 Stato: accettato (2026-11-20)
 
@@ -6,7 +6,7 @@ Stato: accettato (2026-11-20)
 L'utente deve poter salvare e spostare tutti i dati (chat, fonti, documenti, lezioni) tra PC o profili.
 
 ## Decisione
-Export = `VACUUM INTO` del database SQLite in un file `.airl` (nessuna libreria zip). Import = validazione di schema e versione, poi merge nel database corrente. Le API key non vengono mai esportate.
+Export = `VACUUM INTO` del database SQLite in un file `.learnaing` (nessuna libreria zip). Import = validazione di schema e versione, poi merge nel database corrente. Le API key non vengono mai esportate.
 
 ## Conseguenze
 - Un solo file, consistente, apribile con qualsiasi tool SQLite.

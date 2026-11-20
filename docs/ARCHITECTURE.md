@@ -38,7 +38,7 @@ Stato attuale (Fase 0): esistono solo la finestra, il preload con `getVersion` e
 5. Verifica deterministica: ogni citazione include testo verbatim controllato come sottostringa normalizzata della fonte; se non combacia → "non verificata".
 6. Ricerca web: `SearchProvider` con adapter a chiave (Brave/Tavily) e SearXNG. Niente scraping dei motori.
 7. Ultra: ciclo iterativo con budget (iterazioni, fonti, token, costo, tempo), annullabile, stato salvato a ogni iterazione.
-8. Export `.airl` = `VACUUM INTO` → [ADR 004](decisions/004-formato-export.md).
+8. Export `.learnaing` = `VACUUM INTO` → [ADR 004](decisions/004-formato-export.md).
 9. Portable: dati accanto all'exe (`PORTABLE_EXECUTABLE_DIR`); DPAPI lega le chiavi all'utente Windows.
 
 ## Dipendenze ammesse

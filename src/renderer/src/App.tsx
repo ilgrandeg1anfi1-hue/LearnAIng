@@ -9,7 +9,7 @@ export default function App() {
 
   return (
     <main>
-      <h1>AI Research &amp; Learning</h1>
+      <h1>LearnAIng</h1>
       <p>{version && `v${version}`}</p>
     </main>
   )

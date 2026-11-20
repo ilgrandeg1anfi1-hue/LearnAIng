@@ -1,9 +1,10 @@
 {
-  "name": "ai-research-learning",
-  "productName": "AI Research & Learning",
+  "name": "learnaing",
+  "productName": "LearnAIng",
   "version": "0.0.0",
   "private": true,
   "description": "Ricerca approfondita verificata e apprendimento interattivo, dati locali.",
+  "license": "MIT",
   "main": "out/main/index.js",
   "scripts": {
     "prepare": "git config core.hooksPath .githooks",
@@ -13,7 +14,11 @@
     "lint": "tsc --noEmit && eslint .",
     "test": "vitest run src",
     "test:e2e": "electron-vite build && playwright test",
-    "check:sqlite": "node scripts/check-sqlite.mjs"
+    "check:sqlite": "node scripts/check-sqlite.mjs",
+    "dist:ov": "electron-vite build && electron-builder --win --config signing/ov.yml",
+    "dist:azure": "electron-vite build && electron-builder --win --config signing/azure.yml",
+    "verify:signature": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/verify-signature.ps1",
+    "dist:store": "electron-vite build && electron-builder --win appx --config signing/store.yml"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",

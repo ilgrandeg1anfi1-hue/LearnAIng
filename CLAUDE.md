@@ -1,4 +1,4 @@
-# AI Research & Learning
+# LearnAIng
 
 App desktop Windows per ricerca approfondita verificata e apprendimento interattivo. Dati locali, indipendente dai provider AI, installabile (NSIS) e portable.
 

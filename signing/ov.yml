@@ -1,0 +1,11 @@
+# Signed build with an OV/IV code signing certificate from a CA in the Microsoft Trusted Root Program
+# (e.g. Certum SimplySign or SSL.com eSigner: the key stays in the CA's cloud HSM, the certificate
+# appears in the Windows store while the vendor's desktop tool is logged in).
+# Before use: set certificateSubjectName to the certificate CN (your validated legal name).
+extends: electron-builder.yml
+# Fail the build instead of silently shipping unsigned exes.
+forceCodeSigning: true
+win:
+  signtoolOptions:
+    certificateSubjectName: REPLACE_WITH_CERTIFICATE_CN
+    signingHashAlgorithms: [sha256]

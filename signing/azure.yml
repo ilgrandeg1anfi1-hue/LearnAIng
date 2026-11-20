@@ -1,0 +1,13 @@
+# Signed build with Azure Artifact Signing (formerly Trusted Signing).
+# Before use: fill the four values from the Azure portal (they are not secrets).
+# Credentials only via environment (never committed): AZURE_TENANT_ID, AZURE_CLIENT_ID, AZURE_CLIENT_SECRET.
+# Note: electron-builder installs the PowerShell module TrustedSigning from PSGallery at build time.
+extends: electron-builder.yml
+# Fail the build instead of silently shipping unsigned exes.
+forceCodeSigning: true
+win:
+  azureSignOptions:
+    publisherName: REPLACE_WITH_VALIDATED_LEGAL_NAME
+    endpoint: https://weu.codesigning.azure.net/ # region of your account (weu = West Europe)
+    codeSigningAccountName: REPLACE_WITH_ACCOUNT_NAME
+    certificateProfileName: REPLACE_WITH_PROFILE_NAME

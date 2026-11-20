@@ -1,0 +1,13 @@
+# Microsoft Store package (MSIX/AppX). Free for individual developers: the Store signs the package
+# with a Microsoft certificate, so no certificate purchase is needed.
+# Before upload: replace the three REPLACE values with those shown in Partner Center
+# (App management > App identity). They are not secrets.
+# Build with `npm run dist:store` (target `appx` passed on the CLI: config arrays are concatenated, not replaced).
+extends: electron-builder.yml
+appx:
+  identityName: REPLACE.LearnAIng
+  publisher: CN=REPLACE-WITH-PARTNER-CENTER-PUBLISHER-ID
+  publisherDisplayName: REPLACE_WITH_PUBLISHER_DISPLAY_NAME
+  applicationId: LearnAIng
+  languages: [it-IT, en-US]
+  artifactName: ${name}-${version}-store.${ext}
