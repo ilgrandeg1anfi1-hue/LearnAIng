@@ -28,9 +28,14 @@ const rendererUrl = devUrl ?? pathToFileURL(join(__dirname, '../renderer/index.h
 // Portable exe: all data next to it. Unpackaged runs (dev, E2E) may use a scratch dir.
 const portableDir = process.env.PORTABLE_EXECUTABLE_DIR
 const dataDir = portableDir ? join(portableDir, 'LearnAIng-data') : !app.isPackaged ? process.env.LEARNAING_DATA_DIR : undefined
+let dataDirError: unknown // e.g. portable exe in a read-only folder; reported once ready (dialog + locale)
 if (dataDir) {
-  mkdirSync(dataDir, { recursive: true })
-  app.setPath('userData', dataDir)
+  try {
+    mkdirSync(dataDir, { recursive: true })
+    app.setPath('userData', dataDir)
+  } catch (e) {
+    dataDirError = e
+  }
 }
 
 let db: DatabaseSync
@@ -97,13 +102,16 @@ app.whenReady().then(() => {
   session.defaultSession.setPermissionRequestHandler((_wc, _permission, callback) => callback(false))
   session.defaultSession.setPermissionCheckHandler(() => false)
 
-  const file = join(app.getPath('userData'), 'learnaing.db')
+  const file = join(dataDir ?? app.getPath('userData'), 'learnaing.db')
   try {
+    if (dataDirError) throw dataDirError
     db = openDb(file)
   } catch (e) {
-    // Never fall back to a fresh database: the user's data must stay untouched.
+    // Never fall back to a fresh database elsewhere: the user's data must stay where they expect it.
     const lang = app.getLocale().startsWith('it') ? 'it' : 'en'
-    dialog.showErrorBox('LearnAIng', translate(lang, 'db.openError', { path: file, message: String(e) }))
+    const message = translate(lang, 'db.openError', { path: file, message: String(e) })
+    console.error(message)
+    dialog.showErrorBox('LearnAIng', message)
     app.exit(1)
     return
   }

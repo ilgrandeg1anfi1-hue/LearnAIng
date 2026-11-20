@@ -30,13 +30,23 @@ Piano completo: `C:\Users\ilgra\.claude\plans\pasted-content-id-31c7-voglio-prog
 - electron-builder: `dist/ai-research-learning-0.0.0-setup.exe` e `dist/ai-research-learning-0.0.0-portable.exe`.
 - ADR 001–005; `node:sqlite` con FTS5 confermato (ADR 005).
 
+## Verifica exe portable Fase 1 (2026-11-20, prima del push)
+Nessuna VM disponibile su questo PC (niente Windows Sandbox, Hyper-V, VirtualBox, VMware; hypervisor non attivo). Verifica fatta sull'exe portable reale, smontato, senza modificare SAC né altre impostazioni di Windows:
+- Contenuto: `app.asar` estratto dall'exe (7-Zip) identico a `win-unpacked`, contiene solo `out/` + `package.json` + dipendenze di produzione. Hash d'integrità dell'asar incorporato nell'exe = hash reale (altrimenti l'exe crasherebbe all'avvio). Fuse invariati.
+- Esecuzione dell'asar estratto sull'Electron ufficiale con `PORTABLE_EXECUTABLE_DIR` come il launcher: `userData` e `learnaing.db` in `<cartella exe>\LearnAIng-data` (anche il profilo Chromium; nient'altro accanto all'exe), versione e titolo corretti, chat e messaggi presenti dopo 2 riavvii e continuabili, nessun journal residuo, zero errori di renderer (pageerror/console) e main (stderr). Ripetuto con cartella contenente spazi, accenti e caratteri CJK.
+- **Bug trovato e corretto:** exe portable in una cartella dove `LearnAIng-data` non si può creare (sola lettura, Program Files, share) → eccezione al caricamento del main, stack trace tecnico. Ora passa dal messaggio tradotto "Impossibile aprire il database…" (anche su stderr) ed esce con codice 1. Test di regressione `e2e/startup.spec.ts` (fallisce sul codice vecchio). Limite: in quel caso Chromium crea comunque il suo profilo in `%APPDATA%\LearnAIng` prima dell'uscita.
+- E2E di persistenza ora su una cartella dati con spazi, accenti e CJK.
+- Exe reale su questo host: **bloccato da Smart App Control** (CodeIntegrity 3077 + 3118), nessun processo avviato. Build verificata: portable SHA256 `B0F25CF818E3BE01BC58364FC082F6466F9EA945835D4FF69967F363309540CC`.
+- **Non verificabile qui:** avvio dell'exe vero (launcher NSIS, estrazione in `%TEMP%`, impostazione di `PORTABLE_EXECUTABLE_DIR`, controllo d'integrità asar a runtime, fuse attivi a runtime) su Windows pulito. Da fare in VM: copiare l'exe in una cartella, avviarlo, controllare `LearnAIng-data\learnaing.db`, creare una chat, chiudere, riaprire, controllare la chat; DevTools da menu Visualizza per gli errori del renderer.
+- Nota: le dipendenze runtime (`react`, `marked`, `dompurify`, `@types/trusted-types`) finiscono anche in `node_modules` dell'asar pur essendo già nel bundle del renderer: solo spazio, nessun errore.
+
 ## Prossimi passi (Fase 2)
 - Provider reali (`openai-compatible`, `anthropic`) con `fetch` + SSE, stessa forma di `echo`; streaming verso la UI (evento dal main + annullamento).
 - API key cifrate con `safeStorage`, mai al renderer; test "nessuna chiave in IPC/log/export".
 - `security-review` prevista in Fase 2.
 
 ## Problemi aperti
-- **Non verificato su questo PC (Smart App Control):** l'exe impacchettato della Fase 1 (apertura del DB nella cartella dati reale, cartella `LearnAIng-data` del portable). Gli E2E usano lo stesso bundle e lo stesso runtime Electron, ma non asar/percorsi reali: provare in VM o sull'artifact della CI.
+- **Avvio dell'exe vero non verificato su Windows pulito** (qui lo blocca Smart App Control): asar, integrità, fuse, cartella dati e persistenza verificati smontando l'exe (vedi "Verifica exe portable Fase 1"); resta da provarlo in VM o sull'artifact della CI.
 - Due istanze dell'app aprono lo stesso DB (nessun single-instance lock): SQLite regge, ma le liste non si aggiornano tra finestre. Da valutare se serve.
 - **Smart App Control blocca gli exe anche firmati self-signed.** Prova del 2026-11-20 con il certificato `CN=AIRL Dev Self-Signed` (SHA1 `549A01348EE3BCCD0BF399DC17E45DCB0043DB24`, chiave non esportabile in `Cert:\CurrentUser\My`, importato in `CurrentUser\Root` e `TrustedPublisher`): il log CodeIntegrity riporta `KnownRoot=2`, `VerificationError=18`. SAC accetta solo radici del programma Microsoft. Un primo exe firmato era partito per il verdetto di reputazione cloud di Defender, non per la firma; la build successiva (hash diverso) è stata bloccata. Quindi: la firma self-signed è inutile per SAC. Per avviare gli exe su questo PC serve una CA riconosciuta (es. Azure Trusted Signing, certificato OV) oppure testarli su un altro PC/VM. Il pacchetto `app.asar` è verificato con l'Electron firmato.
   Build firmata (solo su questo PC; la cache di electron-builder va disattivata, altrimenti riusa un exe firmato in precedenza ignorando i cambi ai fuse), in PowerShell:

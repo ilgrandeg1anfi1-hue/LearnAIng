@@ -18,7 +18,8 @@ async function launch(dataDir: string) {
 const history = (win: Page) => win.getByRole('navigation', { name: it['chat.history'] })
 
 test('a chat survives a restart and can be continued, renamed and deleted', async () => {
-  const dir = test.info().outputPath('data')
+  // Spaces, accents and CJK: user profile and portable folders often have them.
+  const dir = test.info().outputPath('dati àèì 日本')
   let { app, win } = await launch(dir)
 
   await expect(history(win).getByText(it['chat.none'])).toBeVisible()

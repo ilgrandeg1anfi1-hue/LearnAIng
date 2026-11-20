@@ -3,6 +3,11 @@
 Formato: [Keep a Changelog](https://keepachangelog.com/it/1.1.0/), versioni [SemVer](https://semver.org/lang/it/).
 
 ## [Non rilasciato]
+### Corretto
+- Exe portable in una cartella non scrivibile: messaggio d'errore tradotto e uscita pulita invece di un'eccezione con stack trace all'avvio.
+
+### Test
+- E2E di regressione per la cartella dati non creabile; E2E di persistenza su percorso con spazi, accenti e caratteri CJK.
 
 ## [0.1.0-fase1] - 2026-11-20
 ### Aggiunto
