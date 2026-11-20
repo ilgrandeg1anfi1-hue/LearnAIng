@@ -24,4 +24,8 @@ Piano completo: `C:\Users\ilgra\.claude\plans\pasted-content-id-31c7-voglio-prog
 - **Exe non avviabile su questo PC**: Smart App Control (attivo) blocca gli exe non firmati ("Un criterio di controllo dell'applicazione ha bloccato il file"). Verificato invece che il pacchetto `dist/win-unpacked/resources/app.asar` si avvia con l'Electron firmato e risponde via IPC. Opzioni: firma del codice (certificato), test su un altro PC/VM, oppure accettare. Disattivare Smart App Control non è reversibile senza reinstallare Windows.
 - `npm audit`: 6 vulnerabilità moderate in `electron-builder` (minimatch via `@electron/universal`, solo build). Nessuna alta; la CI fallisce solo da `high` in su.
 - Nessuna icona applicazione (usata quella di Electron).
-- Repo GitHub: vedi stato remote con `git remote -v`; GitHub secret scanning/push protection da attivare sul repo.
+- GitHub secret scanning/push protection non ancora attivati sul repo (su repo privati possono richiedere GitHub Advanced Security).
+
+## Repository
+- https://github.com/ilgrandeg1anfi1-hue/ai-research-learning (privato), `main` + tag `v0.0.0-fase0`.
+- CI su `v0.0.0-fase0`: verde (lint, test, audit) — run 44711577374.
