@@ -31,7 +31,7 @@ Piano completo: `C:\Users\ilgra\.claude\plans\pasted-content-id-31c7-voglio-prog
   **Verifica avvio exe: superata (2026-11-20)** in macchina virtuale: dopo l'avviso SmartScreen (autore sconosciuto → "Esegui comunque") l'app mostra titolo e `v0.0.0`, quindi preload e IPC funzionano nell'exe impacchettato. La persistenza delle chat è coperta solo dall'E2E (non c'è ancora UI chat). Build testata (SHA256): portable `CCBF4D2457E4BC26A6C778F32423FF4E5082A3D2357860000C96DEA689EC727F`, setup `C1EABF5DFC3B3B375EA2B9997370BEE43AA06256CB9EBC86B3B73E0D6813E801`.
 - `npm audit`: 6 vulnerabilità moderate in `electron-builder` (minimatch via `@electron/universal`, solo build). Nessuna alta; la CI fallisce solo da `high` in su.
 - Nessuna icona applicazione (usata quella di Electron).
-- GitHub secret scanning/push protection non disponibili sul repo privato gratuito (API: 422). Sostituiti da gitleaks in CI (job `secrets`).
+- GitHub secret scanning e push protection: **attivi** dal 2026-11-20 (gratuiti con il repo pubblico), in aggiunta a gitleaks (hook locale e job `secrets` in CI).
 - Advisory moderate di `minimatch` (via `app-builder-lib`, `@electron/universal`): non corrette di proposito. Solo build, glob dalla nostra config (ReDoS non sfruttabile); forzare il salto di major rischierebbe di rompere electron-builder. Ricontrollare a ogni aggiornamento di electron-builder.
 
 ## Firma del codice (2026-11-20)
@@ -88,4 +88,5 @@ Revisione manuale di tutto il codice (la skill `security-review` analizza solo d
 ## Repository
 - https://github.com/ilgrandeg1anfi1-hue/LearnAIng (**pubblico** dal 2026-11-20, licenza MIT), `main` + tag `v0.0.0-fase0`. Rinominato da `ai-research-learning` (GitHub reindirizza il vecchio URL).
 - Prima della pubblicazione: gitleaks su tutta la cronologia e sui file (nessun segreto); email dei commit riscritta in `emailprogrammare@gmail.com` (cronologia e tag riscritti, push forzato). Email impostata nella config git locale del repo.
-- CI su `v0.0.0-fase0`: verde (lint, test, audit) — run 44711577374. Dopo: aggiunti E2E e gitleaks in CI.
+- Esecuzioni CI dei commit originali cancellate (rimandavano ai commit con la vecchia email). Anche così GitHub può conservare i vecchi commit raggiungibili per SHA esatto: per rimuoverli del tutto serve una richiesta al supporto GitHub.
+- CI sul push forzato: `check` verde, `secrets` fallito perché la gitleaks-action scansiona `<primo commit>^..HEAD` e il primo commit del push era la radice (`3434a81^` non esiste). Nessun segreto: scansione completa locale pulita. Si risolve da sola ai push normali.
