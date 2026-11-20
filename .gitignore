@@ -1,0 +1,14 @@
+node_modules/
+out/
+dist/
+test-results/
+playwright-report/
+.env
+.env.*
+*.log
+# user data must never be committed
+*.sqlite
+*.sqlite-*
+*.db
+*.airl
+data/
