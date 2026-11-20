@@ -1,6 +1,6 @@
 name: Release
 # Pushing a tag v* builds the installer and portable exe on a clean runner and publishes a pre-release.
-# Release binaries are built only here, never on a personal machine (required by SignPath).
+# Release binaries are built only here, never on a personal machine.
 on:
   push:
     tags: ['v*']

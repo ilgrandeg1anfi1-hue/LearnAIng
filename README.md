@@ -11,7 +11,9 @@ LearnAIng is a Windows desktop app (Electron + TypeScript) that researches a top
 > **Status:** early development. The current build contains the app shell only; research, chat and lessons arrive in the next phases ([docs/PROGRESS.md](docs/PROGRESS.md)).
 
 ## Download
-Builds are on the [Releases](https://github.com/ilgrandeg1anfi1-hue/LearnAIng/releases) page: `-setup.exe` (installer) and `-portable.exe`. Current builds are **not code-signed yet**, so Windows SmartScreen shows "Unknown publisher" (choose *More info → Run anyway*); Smart App Control may block them.
+A Microsoft Store version (signed by Microsoft, no SmartScreen warning) is in preparation.
+
+Builds are on the [Releases](https://github.com/ilgrandeg1anfi1-hue/LearnAIng/releases) page: `-setup.exe` (installer) and `-portable.exe`. They are **not code-signed**, so Windows SmartScreen shows "Unknown publisher" (choose *More info → Run anyway*); Smart App Control may block them.
 
 ## Build from source
 Requires Node.js 24 and Windows.
@@ -26,7 +28,6 @@ npm run dist       # installer + portable exe in dist/
 
 ## Documents
 - [Privacy policy](PRIVACY.md)
-- [Code signing policy](CODE_SIGNING_POLICY.md)
 - [Architecture](docs/ARCHITECTURE.md) (Italian)
 
 ## License

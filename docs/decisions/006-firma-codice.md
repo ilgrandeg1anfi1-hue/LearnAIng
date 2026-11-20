@@ -12,4 +12,6 @@
 
 - Budget zero: distribuzione principale tramite Microsoft Store (`signing/store.yml`, MSIX firmato da Microsoft, account individuale gratuito). I certificati OV/Azure restano pronti per quando ci sarà budget.
 
+**Aggiornamento (2026-11-20).** SignPath Foundation ha rifiutato la richiesta. Confermato il Microsoft Store come unico canale firmato: è l'unica via gratuita che mostra il nome dell'autore (SignPath e OSSign mostrerebbero il proprio nome come editore) e che evita SmartScreen e il blocco di Smart App Control. Gli exe setup/portable su GitHub restano non firmati, con l'avviso dichiarato.
+
 **Conseguenze.** Il build non firmato (`npm run dist`) resta invariato; un test verifica che le config firmate mantengano fuse, file e target. La reputazione SmartScreen si costruisce comunque nel tempo, per hash del file.
